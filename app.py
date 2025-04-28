@@ -1,77 +1,119 @@
 import streamlit as st
-from chatbot import ask_chatbot
-import os
+from chatbot2 import ask_chatbot
 
-# Page configuration
+# LIC Branding Colors
+PRIMARY_BLUE = "#002060"
+LIC_YELLOW = "#FDB913"
+WHITE = "#FFFFFF"
+LIGHT_GREY = "#F5F5F5"
+DARK_TEXT = "#1c1c1c"
+
+# Page Config
 st.set_page_config(
-    page_title="Insurance Advisor AI",
+    page_title="LIC Advisor Chatbot",
     page_icon="💼",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# Custom CSS
-st.markdown("""
-<style>
-    .main-header {
-        font-size: 2.5rem;
-        color: #2E7D32;
-    }
-    .subheader {
-        font-size: 1.5rem;
-        color: #558B2F;
-    }
-    .stTextInput>div>div>input {
-        border-radius: 10px;
-    }
-</style>
+# Custom Styling
+st.markdown(f"""
+    <style>
+        body {{
+            background-color: {PRIMARY_BLUE};
+        }}
+        .main-header {{
+            font-size: 2.8rem;
+            color: {LIC_YELLOW};
+            font-weight: 800;
+            margin-bottom: 0;
+        }}
+        .subheader {{
+            font-size: 1.2rem;
+            color: {WHITE};
+            margin-bottom: 2rem;
+        }}
+        .stChatMessage {{
+            border-radius: 15px;
+            padding: 1rem;
+            margin: 10px 0;
+        }}
+        .stChatMessage.user {{
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            font-weight: 500;
+            border-radius: 15px;
+            padding: 1rem;
+            box-shadow: 0 0 6px rgba(0,0,0,0.1);
+        }}
+        .stChatMessage.assistant {{
+            background-color: #fff8dc !important;
+            color: {DARK_TEXT} !important;
+            border-radius: 15px;
+            padding: 1rem;
+            box-shadow: 0 0 6px rgba(0,0,0,0.1);
+        }}
+        .stTextInput > div > div > input {{
+            border-radius: 8px;
+            padding: 12px;
+            background-color: #0f1c3f;
+            color: {WHITE};
+            border: 2px solid {LIC_YELLOW};
+        }}
+        .css-1v0mbdj p {{
+            color: {WHITE};
+        }}
+        .block-container {{
+            background-color: {PRIMARY_BLUE};
+        }}
+    </style>
 """, unsafe_allow_html=True)
 
-# App tabs
-tab1 = st.tabs(["Chat with Insurance Advisor"])[0]
+# Main title
+st.markdown(f'<p class="main-header">💼 Insurance Advisor AI</p>', unsafe_allow_html=True)
+st.markdown(f'<p class="subheader">Your Smart LIC Insurance Assistant</p>', unsafe_allow_html=True)
 
-with tab1:
-    st.markdown('<p class="main-header">💼 Insurance Advisor AI</p>', unsafe_allow_html=True)
-    st.markdown('<p class="subheader">Your AI-powered insurance assistant</p>', unsafe_allow_html=True)
+# Chat logic
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-    # Initialize chat history
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-    # Display chat history
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+query = st.chat_input("Type your LIC query here...")
 
-    # Chat input
-    query = st.chat_input("Ask me anything about insurance...")
+if query:
+    st.session_state.messages.append({"role": "user", "content": query})
+    with st.chat_message("user"):
+        st.markdown(query)
 
-    if query:
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": query})
-        
-        # Display user message
-        with st.chat_message("user"):
-            st.markdown(query)
-        
-        # Generate and display assistant response
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                response = ask_chatbot(query)
-            st.markdown(response)
-        
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": response})
+    with st.chat_message("assistant"):
+        with st.spinner("Let me check LIC records for you..."):
+            response = ask_chatbot(query)
 
-# Sidebar with information
+        # Assistant message in styled yellow box
+        st.markdown(f"""
+            <div style="background-color: #fff8dc; color: {DARK_TEXT}; padding: 1rem; border-radius: 12px;">
+                <p style="margin:0;">
+                    <span style="font-size:1.3rem;">📋</span> {response}
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.session_state.messages.append({"role": "assistant", "content": response})
+
+# Sidebar
 with st.sidebar:
-    st.image("https://api.placeholder.com/120/120", width=120)
-    st.markdown("### Insurance Advisor AI")
-    st.markdown("This AI assistant helps with:")
-    st.markdown("- Understanding insurance policies")
-    st.markdown("- Claims process guidance")
-    st.markdown("- Coverage and premium details")
-    st.markdown("- General insurance FAQs")
-    
+    st.image("https://companieslogo.com/img/orig/LICI.NS-189af092.png?t=1720244492", width=130)
+    st.markdown(f"### <span style='color:{LIC_YELLOW}'>LIC Advisor Chatbot</span>", unsafe_allow_html=True)
     st.markdown("---")
-    st.markdown("### Data Sources")
-    st.markdown("This chatbot is trained on insurance regulations, policies, and industry best practices.")
+    st.markdown("#### 🤖 What I Can Help You With")
+    st.markdown("🔹 **Policy Info**  \n🔹 **Claims**  \n🔹 **Premiums**  \n🔹 **FAQs**")
+
+    st.markdown(" ")
+    st.markdown("#### 📁 Data Sources")
+    st.markdown("This chatbot uses LIC brochures, policy PDFs & IRDAI documents.")
+
+    st.markdown("---")
+    st.markdown("Made with 💛 by Rutuja & Komal", unsafe_allow_html=True)
